@@ -10,12 +10,19 @@ self.addEventListener('message', (event) => {
         const body = event.data.bodyText || "Nessun testo fornito";
 
         const options = {
-            body: body, // Usiamo la variabile ricevuta
-            icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-            tag: "pwa-30s",
-            renotify: true,
-            vibrate: [200, 100, 200]
-        };
+        body: body,
+        icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
+        tag: "pwa-30s",
+        
+        // --- QUESTE RIGHE ATTIVANO IL POPUP IN ALTO ---
+        renotify: true,
+        vibrate: [200, 100, 200], // La vibrazione è spesso necessaria per il popup
+        priority: "high",         // Per i browser basati su Chromium
+        data: {
+            priority: "high"
+        }
+        // ----------------------------------------------
+    };
         
         self.registration.showNotification(title, options);
     }
