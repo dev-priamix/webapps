@@ -1,45 +1,50 @@
-const debug = document.getElementById('debug');
 const timerDisplay = document.getElementById('timer-display');
+const logDiv = document.getElementById('log');
 let timeLeft = 30;
-let countdownInterval;
+let timerRunning = false;
 
 function log(msg) {
-    debug.innerHTML += "> " + msg + "<br>";
-    debug.scrollTop = debug.scrollHeight;
+    logDiv.innerHTML += "> " + msg + "<br>";
+    logDiv.scrollTop = logDiv.scrollHeight;
 }
 
-// Registrazione Service Worker
+// Registrazione SW
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-    .then(reg => log("SW registrato con successo ✅"))
-    .catch(err => log("Errore SW: " + err));
+    navigator.serviceWorker.register('./sw.js').then(() => log("SW Registrato"));
 }
 
 async function pushNotification() {
-    log("Eseguo pushNotification()...");
     const permission = await Notification.requestPermission();
-    
-    if (permission === 'granted') {
-        log("Permesso accordato.");
-        const reg = await navigator.serviceWorker.ready;
-        reg.active.postMessage({ action: 'START_LOOP' });
-        startVisualTimer();
-    } else {
-        log("Permesso NEGATO ❌");
-        alert("Attiva le notifiche nelle impostazioni!");
+    if (permission !== 'granted') {
+        alert("Permesso negato!");
+        return;
     }
+
+    if (timerRunning) return;
+    timerRunning = true;
+    log("Loop avviato...");
+    
+    // Eseguiamo la prima notifica subito
+    triggerSwNotification();
+    startCountdown();
 }
 
-function startVisualTimer() {
-    clearInterval(countdownInterval);
-    timeLeft = 30;
-    timerDisplay.innerText = timeLeft;
-    
-    countdownInterval = setInterval(() => {
+function startCountdown() {
+    setInterval(() => {
         timeLeft--;
-        if (timeLeft < 0) timeLeft = 30;
+        if (timeLeft < 0) {
+            timeLeft = 30;
+            log("Tempo scaduto! Sveglio il SW...");
+            triggerSwNotification();
+        }
         timerDisplay.innerText = timeLeft;
     }, 1000);
+}
+
+function triggerSwNotification() {
+    navigator.serviceWorker.ready.then(reg => {
+        reg.active.postMessage({ action: 'SEND_PUSH' });
+    });
 }
 
 document.getElementById('btn').addEventListener('click', pushNotification);
