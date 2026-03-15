@@ -29,6 +29,9 @@ async function pushNotification() {
     startCountdown();
 }
 
+
+
+
 function startCountdown() {
     setInterval(() => {
         timeLeft--;
@@ -40,6 +43,9 @@ function startCountdown() {
         timerDisplay.innerText = timeLeft;
     }, 1000);
 }
+
+
+
 
 function triggerSwNotification() {
     navigator.serviceWorker.ready.then(reg => {
