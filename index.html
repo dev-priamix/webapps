@@ -4,46 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <title>PWA GitHub Fix</title>
+    <title>PWA 30s Fix</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f9; }
-        .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        button { padding: 15px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 18px; width: 100%; cursor: pointer; }
-        #status { margin-top: 15px; font-size: 14px; }
+        body { font-family: sans-serif; text-align: center; padding: 30px; background: #f0f4f8; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; cursor: pointer; }
+        #log { margin-top: 20px; font-size: 13px; color: #666; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>Notifiche ogni 30s</h2>
-        <button id="startBtn">ATTIVA CICLO</button>
-        <p id="status">Verifica Service Worker...</p>
+    <div class="card">
+        <h2>PWA Android Test</h2>
+        <button id="btn">ATTIVA LOOP 30s</button>
+        <div id="log">Stato: In attesa...</div>
     </div>
 
     <script>
-        const status = document.getElementById('status');
+        const log = document.getElementById('log');
 
-        // REGISTRAZIONE CORRETTA PER GITHUB PAGES
         if ('serviceWorker' in navigator) {
-            // Usiamo './sw.js' per essere sicuri che legga la cartella attuale
             navigator.serviceWorker.register('./sw.js')
-            .then(reg => {
-                status.innerText = "Service Worker registrato correttamente!";
-                status.style.color = "green";
-            })
-            .catch(err => {
-                status.innerText = "Errore SW: " + err.message;
-                status.style.color = "red";
-            });
+            .then(() => log.innerText = "1. Service Worker Registrato");
         }
 
-        document.getElementById('startBtn').addEventListener('click', async () => {
+        document.getElementById('btn').addEventListener('click', async () => {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
-                status.innerText = "Loop avviato! Riceverai notifiche ogni 30s.";
+                log.innerText = "2. Permesso OK. Invio comando...";
                 const reg = await navigator.serviceWorker.ready;
-                reg.active.postMessage({ action: 'START_TIMER', interval: 30000 });
+                reg.active.postMessage({ action: 'START_TIMER' });
             } else {
-                alert("Permesso notifiche negato!");
+                log.innerText = "ERRORE: Permesso negato!";
             }
         });
     </script>
