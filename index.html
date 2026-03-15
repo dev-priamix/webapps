@@ -3,59 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="/manifest.json">
-    <title>PWA Fix</title>
+    <link rel="manifest" href="manifest.json">
+    <title>PWA GitHub Fix</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        #startBtn { padding: 20px; background: blue; color: white; border: none; border-radius: 10px; width: 100%; font-size: 20px;}
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f9; }
+        .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        button { padding: 15px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 18px; width: 100%; cursor: pointer; }
+        #status { margin-top: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
-
-    <button id="startBtn">CLICCA QUI PER ATTIVARE</button>
-    <p id="status">Stato: Inizializzazione...</p>
+    <div class="box">
+        <h2>Notifiche ogni 30s</h2>
+        <button id="startBtn">ATTIVA CICLO</button>
+        <p id="status">Verifica Service Worker...</p>
+    </div>
 
     <script>
-        const btn = document.getElementById('startBtn');
         const status = document.getElementById('status');
 
-        // Controlla se siamo su HTTPS
-        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-            status.innerText = "ERRORE: Devi usare HTTPS!";
-            status.style.color = "red";
+        // REGISTRAZIONE CORRETTA PER GITHUB PAGES
+        if ('serviceWorker' in navigator) {
+            // Usiamo './sw.js' per essere sicuri che legga la cartella attuale
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                status.innerText = "Service Worker registrato correttamente!";
+                status.style.color = "green";
+            })
+            .catch(err => {
+                status.innerText = "Errore SW: " + err.message;
+                status.style.color = "red";
+            });
         }
 
-        async function inizializza() {
-            if ('serviceWorker' in navigator) {
-                try {
-                    await navigator.serviceWorker.register('sw.js');
-                    status.innerText = "Service Worker: OK. Clicca il tasto blu.";
-                } catch (e) {
-                    status.innerText = "Errore SW: " + e.message;
-                }
-            }
-        }
-
-        btn.addEventListener('click', async () => {
-            status.innerText = "Richiesta permesso in corso...";
-            
-            try {
-                const permission = await Notification.requestPermission();
-                
-                if (permission === 'granted') {
-                    status.innerText = "Permesso ACCORDATO! Avvio timer...";
-                    const reg = await navigator.serviceWorker.ready;
-                    reg.active.postMessage({ action: 'START_TIMER', interval: 30000 });
-                } else {
-                    status.innerText = "Permesso NEGATO. Controlla le impostazioni del browser.";
-                    status.style.color = "red";
-                }
-            } catch (err) {
-                status.innerText = "Errore al click: " + err.message;
+        document.getElementById('startBtn').addEventListener('click', async () => {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                status.innerText = "Loop avviato! Riceverai notifiche ogni 30s.";
+                const reg = await navigator.serviceWorker.ready;
+                reg.active.postMessage({ action: 'START_TIMER', interval: 30000 });
+            } else {
+                alert("Permesso notifiche negato!");
             }
         });
-
-        inizializza();
     </script>
 </body>
 </html>

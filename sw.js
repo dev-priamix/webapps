@@ -5,15 +5,16 @@ self.addEventListener('message', (event) => {
         if (timer) clearInterval(timer);
         
         timer = setInterval(() => {
-            self.registration.showNotification("App Funzionante", {
-                body: "Notifica ogni 30 secondi attiva!",
+            self.registration.showNotification("Notifica Attiva", {
+                body: "Loop da 30 secondi funzionante su GitHub!",
                 icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-                tag: "check-30s",
-                renotify: true
+                tag: "pwa-notif",
+                renotify: true,
+                vibrate: [100, 50, 100]
             });
         }, event.data.interval);
     }
 });
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', () => self.registration.claim());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
