@@ -1,4 +1,5 @@
 let timerId = null;
+let notificationCount = 0;
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -12,24 +13,23 @@ self.addEventListener('message', (event) => {
     if (event.data.action === 'START_LOOP') {
         if (timerId) clearInterval(timerId);
 
-        // Notifica immediata
-        inviaNotifica("Loop Avviato", "Riceverai notifiche ogni 30 secondi.");
+        notificationCount = 0;
+        sendNote("Loop Iniziato", "Riceverai notifiche ogni 30 secondi.");
 
-        // Avvio loop
         timerId = setInterval(() => {
-            inviaNotifica("Aggiornamento", "Sono passati 30 secondi.");
+            notificationCount++;
+            sendNote("Notifica #" + notificationCount, "Sono passati altri 30 secondi.");
         }, 30000);
     }
 });
 
-function inviaNotifica(titolo, testo) {
-    // Il Service Worker usa self.registration per mostrare notifiche
-    self.registration.showNotification(titolo, {
-        body: testo,
+function sendNote(title, text) {
+    self.registration.showNotification(title, {
+        body: text,
         icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-        vibrate: [200, 100, 200],
-        tag: "timer-notifica",
+        badge: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
+        tag: "timer-30s",
         renotify: true,
-        requireInteraction: false // Su Android aiuta a non bloccare la coda
+        vibrate: [200, 100, 200]
     });
 }

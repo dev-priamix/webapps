@@ -4,45 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <title>Notifiche 30s Loop</title>
+    <title>PWA Counter 30s</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 30px; background: #f0f2f5; }
-        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        button { padding: 15px 25px; font-size: 18px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 8px; width: 100%; }
-        #debug { margin-top: 20px; font-size: 12px; color: #888; text-align: left; background: #eee; padding: 10px; border-radius: 5px; height: 100px; overflow-y: auto; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #eef2f3; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); max-width: 350px; margin: auto; }
+        button { background: #007bff; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; cursor: pointer; margin-bottom: 20px; }
+        #timer-display { font-size: 48px; font-weight: bold; color: #007bff; margin: 10px 0; }
+        #debug { text-align: left; font-size: 12px; background: #333; color: #0f0; padding: 10px; border-radius: 5px; height: 120px; overflow-y: auto; font-family: monospace; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Push App</h1>
+    <div class="card">
+        <h2>Push Control</h2>
         <button id="btn">Attiva pushNotification()</button>
-        <div id="debug">Log di sistema...</div>
+        <div>Prossima notifica tra:</div>
+        <div id="timer-display">30</div>
+        <div id="debug">Log: In attesa...</div>
     </div>
-
-    <script>
-        const debug = document.getElementById('debug');
-        function log(msg) { debug.innerHTML += "<br>" + msg; debug.scrollTop = debug.scrollHeight; }
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js', { scope: './' })
-            .then(reg => log("Service Worker registrato! ✅"))
-            .catch(err => log("Errore SW: " + err));
-        }
-
-        async function pushNotification() {
-            log("Chiamata a pushNotification()...");
-            const permission = await Notification.requestPermission();
-            
-            if (permission === 'granted') {
-                log("Permesso accordato. Invio segnale al SW...");
-                const reg = await navigator.serviceWorker.ready;
-                reg.active.postMessage({ action: 'START_LOOP' });
-            } else {
-                log("Permesso negato! ❌");
-            }
-        }
-
-        document.getElementById('btn').addEventListener('click', pushNotification);
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

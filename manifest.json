@@ -1,6 +1,6 @@
 {
-  "name": "Notifiche 30s",
-  "short_name": "PushApp",
+  "name": "Notification Counter",
+  "short_name": "PushCount",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -9,6 +9,11 @@
     {
       "src": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]

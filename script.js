@@ -1,29 +1,45 @@
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-    .then(reg => console.log("SW registrato!"))
-    .catch(err => console.error("Errore SW:", err));
+const debug = document.getElementById('debug');
+const timerDisplay = document.getElementById('timer-display');
+let timeLeft = 30;
+let countdownInterval;
+
+function log(msg) {
+    debug.innerHTML += "> " + msg + "<br>";
+    debug.scrollTop = debug.scrollHeight;
 }
 
-document.getElementById('btnNotifiche').addEventListener('click', () => {
-    Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-            // TEST IMMEDIATO: manda subito una notifica per verificare il telefono
-            navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification("Test Immediato", {
-                    body: "Se leggi questo, il telefono riceve le notifiche!",
-                    icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png"
-                });
-            });
+// Registrazione Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+    .then(reg => log("SW registrato con successo ✅"))
+    .catch(err => log("Errore SW: " + err));
+}
 
-            // Avvio del timer da 30 secondi nel Service Worker
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({
-                    type: 'START_TIMER',
-                    secondi: 10
-                });
-            }
-        } else {
-            alert("Devi autorizzare le notifiche!");
-        }
-    });
-});
+async function pushNotification() {
+    log("Eseguo pushNotification()...");
+    const permission = await Notification.requestPermission();
+    
+    if (permission === 'granted') {
+        log("Permesso accordato.");
+        const reg = await navigator.serviceWorker.ready;
+        reg.active.postMessage({ action: 'START_LOOP' });
+        startVisualTimer();
+    } else {
+        log("Permesso NEGATO ❌");
+        alert("Attiva le notifiche nelle impostazioni!");
+    }
+}
+
+function startVisualTimer() {
+    clearInterval(countdownInterval);
+    timeLeft = 30;
+    timerDisplay.innerText = timeLeft;
+    
+    countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft < 0) timeLeft = 30;
+        timerDisplay.innerText = timeLeft;
+    }, 1000);
+}
+
+document.getElementById('btn').addEventListener('click', pushNotification);
