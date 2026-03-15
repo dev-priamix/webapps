@@ -8,7 +8,7 @@
   "scope": "./",
   "icons": [
     {
-      "src": "https://fonts.gstatic.com/s/i/short-term/release/googlestandardsymbols/notifications/default/48px.svg",
+      "src": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
       "sizes": "48x48",
       "type": "image/svg+xml",
       "purpose": "any"
