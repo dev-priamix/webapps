@@ -26,4 +26,4 @@ function avviaTimer(minuti) {
 }
 
 // Esempio: Avvia ogni 5 minuti
-avviaTimer(5);
+avviaTimer(1);
