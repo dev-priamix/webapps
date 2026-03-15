@@ -19,7 +19,7 @@ document.getElementById('btnNotifiche').addEventListener('click', () => {
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'START_TIMER',
-                    secondi: 30
+                    secondi: 10
                 });
             }
         } else {

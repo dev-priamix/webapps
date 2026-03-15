@@ -1,32 +1,7 @@
-// let timer = null;
-
-// self.addEventListener('message', (event) => {
-//     if (event.data.action === 'START_TIMER') {
-//         if (timer) clearInterval(timer);
-        
-//         timer = setInterval(() => {
-//             self.registration.showNotification("Notifica Attiva", {
-//                 body: "Loop da 30 secondi funzionante su GitHub!",
-//                 icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-//                 tag: "pwa-notif",
-//                 renotify: true,
-//                 vibrate: [100, 50, 100]
-//             });
-//         }, event.data.interval);
-//     }
-// });
-
-// self.addEventListener('install', () => self.skipWaiting());
-// self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
-
-
-
-// ---------------------------
-
-let timer = null;
+let timerId = null;
 
 self.addEventListener('install', (event) => {
-    self.skipWaiting(); // Forza l'attivazione immediata
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -34,24 +9,27 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-    if (event.data.action === 'START_TIMER') {
-        if (timer) clearInterval(timer);
-        
-        // Prima notifica immediata per conferma
-        mostraNotifica("Sistema Partito!");
+    if (event.data.action === 'START_LOOP') {
+        if (timerId) clearInterval(timerId);
 
-        timer = setInterval(() => {
-            mostraNotifica("Sono passati 30 secondi");
+        // Notifica immediata
+        inviaNotifica("Loop Avviato", "Riceverai notifiche ogni 30 secondi.");
+
+        // Avvio loop
+        timerId = setInterval(() => {
+            inviaNotifica("Aggiornamento", "Sono passati 30 secondi.");
         }, 30000);
     }
 });
 
-function mostraNotifica(testo) {
-    self.registration.showNotification("Notifica Android", {
+function inviaNotifica(titolo, testo) {
+    // Il Service Worker usa self.registration per mostrare notifiche
+    self.registration.showNotification(titolo, {
         body: testo,
         icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
         vibrate: [200, 100, 200],
-        tag: "loop-30s",
-        renotify: true
+        tag: "timer-notifica",
+        renotify: true,
+        requireInteraction: false // Su Android aiuta a non bloccare la coda
     });
 }
