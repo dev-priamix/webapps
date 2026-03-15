@@ -1,29 +1,31 @@
-// Funzione che invia la notifica
-function inviaNotificaPeriodica() {
-    if (Notification.permission === "granted") {
-        new Notification("Promemoria!", {
-            body: "È passato il tempo impostato! Controlla la tua app.",
-            icon: "icon-192.png" // Assicurati che il percorso sia corretto
-        });
-    }
+// Registrazione Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log("Service Worker registrato correttamente!", reg.scope))
+    .catch(err => console.error("Errore registrazione SW (controlla se il file sw.js esiste):", err));
 }
 
-// Chiedi il permesso e avvia il timer
-function avviaTimer(minuti) {
+document.getElementById('btnNotifiche').addEventListener('click', () => {
+    // Richiesta permessi
     Notification.requestPermission().then(permission => {
         if (permission === "granted") {
-            const millisecondi = minuti * 60 * 1000;
+            console.log("Permesso accordato!");
             
-            // Invia la prima notifica subito
-            inviaNotificaPeriodica();
+            // Notifica immediata di conferma
+            new Notification("Sistema Attivo", { 
+                body: "Le notifiche sono state attivate correttamente.",
+                icon: "https://cdn-icons-png.flaticon.com/192/2523/2523159.png"
+            });
 
-            // Poi imposta l'intervallo
-            setInterval(inviaNotificaPeriodica, millisecondi);
-            
-            console.log(`Timer avviato: riceverai una notifica ogni ${minuti} minuti.`);
+            // Inviamo il comando al Service Worker per il background
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'START_TIMER',
+                    minuti: 1
+                });
+            }
+        } else {
+            alert("Devi autorizzare le notifiche per testare l'app.");
         }
     });
-}
-
-// Esempio: Avvia ogni 5 minuti
-avviaTimer(1);
+});

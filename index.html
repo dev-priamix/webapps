@@ -2,13 +2,20 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2196f3">
-    <title>Mia PWA</title>
+    <title>Mia PWA Funzionante</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
+        button { padding: 15px 25px; font-size: 18px; cursor: pointer; background: #2196f3; color: white; border: none; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        button:active { background: #1976d2; }
+    </style>
 </head>
 <body>
-    <h1>Benvenuto nella mia App</h1>
-    <button onclick="chiediPermesso()">Attiva Notifiche</button>
+    <h1>La mia Web App Android/PC</h1>
+    <p>Se la console è pulita, vedrai l'icona di installazione in alto.</p>
+    <button id="btnNotifiche">Attiva Notifiche (Ogni 1 min)</button>
 
     <script src="script.js"></script>
 </body>
