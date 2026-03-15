@@ -1,23 +1,22 @@
 // Registrazione Service Worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
-    .then(reg => console.log("Service Worker registrato correttamente!", reg.scope))
-    .catch(err => console.error("Errore registrazione SW (controlla se il file sw.js esiste):", err));
+    .then(reg => console.log("SW registrato per lo scope:", reg.scope))
+    .catch(err => console.error("Errore registrazione SW:", err));
 }
 
 document.getElementById('btnNotifiche').addEventListener('click', () => {
-    // Richiesta permessi
     Notification.requestPermission().then(permission => {
         if (permission === "granted") {
-            console.log("Permesso accordato!");
-            
-            // Notifica immediata di conferma
-            new Notification("Sistema Attivo", { 
-                body: "Le notifiche sono state attivate correttamente.",
-                icon: "https://cdn-icons-png.flaticon.com/192/2523/2523159.png"
+            // Notifica di test immediata
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification("Sistema Attivo!", {
+                    body: "Le notifiche periodiche sono partite.",
+                    icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png"
+                });
             });
 
-            // Inviamo il comando al Service Worker per il background
+            // Avvio timer nel Service Worker
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'START_TIMER',
@@ -25,7 +24,7 @@ document.getElementById('btnNotifiche').addEventListener('click', () => {
                 });
             }
         } else {
-            alert("Devi autorizzare le notifiche per testare l'app.");
+            alert("Devi autorizzare le notifiche!");
         }
     });
 });
