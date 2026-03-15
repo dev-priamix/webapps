@@ -1,3 +1,7 @@
+// AGGIUNGI QUESTO IN CIMA AL TUO sw.js
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', () => self.registration.claim());
+
 self.addEventListener('message', (event) => {
     if (event.data.action === 'SEND_PUSH') {
         
