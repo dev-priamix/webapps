@@ -3,9 +3,9 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
 self.addEventListener('message', (event) => {
     if (event.data.action === 'SEND_PUSH') {
-        const title = "PWA Notifica";
+        const title = "Inventario Frigo";
         const options = {
-            body: "Sono passati 30 secondi!",
+            body: "Notifica",
             icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
             tag: "pwa-30s", // Sovrascrive la precedente
             renotify: true,  // Forza vibrazione/suono

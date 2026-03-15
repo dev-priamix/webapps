@@ -1,3 +1,8 @@
+let cibo = [
+    ['carne', new Date(2026, 0, 15)]
+]
+
+
 const timerDisplay = document.getElementById('timer-display');
 const logDiv = document.getElementById('log');
 let timeLeft = 30;
@@ -19,31 +24,11 @@ async function pushNotification() {
         alert("Permesso negato!");
         return;
     }
-
-    if (timerRunning) return;
-    timerRunning = true;
-    log("Loop avviato...");
     
     // Eseguiamo la prima notifica subito
     triggerSwNotification();
-    startCountdown();
+
 }
-
-
-
-
-function startCountdown() {
-    setInterval(() => {
-        timeLeft--;
-        if (timeLeft < 0) {
-            timeLeft = 30;
-            log("Tempo scaduto! Sveglio il SW...");
-            triggerSwNotification();
-        }
-        timerDisplay.innerText = timeLeft;
-    }, 1000);
-}
-
 
 
 
