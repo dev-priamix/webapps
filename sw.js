@@ -22,7 +22,7 @@ function avviaLoopNotifiche() {
                 renotify: true
             });
         }
-    }, 30000); // 30 secondi
+    }, 60000); // 30 secondi
 }
 
 // Restiamo comunque in ascolto per messaggi manuali
