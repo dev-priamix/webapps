@@ -4,21 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2196f3">
-    <title>PWA Notifiche</title>
+    <title>PWA Fix</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f0f2f5; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; }
-        button { padding: 15px 25px; font-size: 18px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 8px; transition: 0.3s; }
-        button:hover { background: #0056b3; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        #startBtn { padding: 20px; background: blue; color: white; border: none; border-radius: 10px; width: 100%; font-size: 20px;}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>App Notifiche Periodiche</h1>
-        <p>Riceverai una notifica ogni 30 con immagine.</p>
-        <button id="btnNotifiche">Attiva Sistema</button>
-    </div>
-    <script src="script.js"></script>
+
+    <button id="startBtn">CLICCA QUI PER ATTIVARE</button>
+    <p id="status">Stato: Inizializzazione...</p>
+
+    <script>
+        const btn = document.getElementById('startBtn');
+        const status = document.getElementById('status');
+
+        // Controlla se siamo su HTTPS
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            status.innerText = "ERRORE: Devi usare HTTPS!";
+            status.style.color = "red";
+        }
+
+        async function inizializza() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('sw.js');
+                    status.innerText = "Service Worker: OK. Clicca il tasto blu.";
+                } catch (e) {
+                    status.innerText = "Errore SW: " + e.message;
+                }
+            }
+        }
+
+        btn.addEventListener('click', async () => {
+            status.innerText = "Richiesta permesso in corso...";
+            
+            try {
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    status.innerText = "Permesso ACCORDATO! Avvio timer...";
+                    const reg = await navigator.serviceWorker.ready;
+                    reg.active.postMessage({ action: 'START_TIMER', interval: 30000 });
+                } else {
+                    status.innerText = "Permesso NEGATO. Controlla le impostazioni del browser.";
+                    status.style.color = "red";
+                }
+            } catch (err) {
+                status.innerText = "Errore al click: " + err.message;
+            }
+        });
+
+        inizializza();
+    </script>
 </body>
 </html>

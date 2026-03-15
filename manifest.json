@@ -1,18 +1,11 @@
 {
-  "name": "App Notifiche Test",
-  "short_name": "TestApp",
+  "name": "PWA Notifiche 30s",
+  "short_name": "30sApp",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2196f3",
-  "scope": "./",
+  "theme_color": "#007bff",
   "icons": [
-    {
-      "src": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
       "sizes": "192x192",

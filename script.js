@@ -1,31 +1,29 @@
-// Registrazione Service Worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
-    .then(reg => console.log("Service Worker registrato correttamente!", reg.scope))
-    .catch(err => console.error("Errore registrazione SW (controlla se il file sw.js esiste):", err));
+    .then(reg => console.log("SW registrato!"))
+    .catch(err => console.error("Errore SW:", err));
 }
 
 document.getElementById('btnNotifiche').addEventListener('click', () => {
-    // Richiesta permessi
     Notification.requestPermission().then(permission => {
         if (permission === "granted") {
-            console.log("Permesso accordato!");
-            
-            // Notifica immediata di conferma
-            new Notification("Sistema Attivo", { 
-                body: "Le notifiche sono state attivate correttamente.",
-                icon: "https://cdn-icons-png.flaticon.com/192/2523/2523159.png"
+            // TEST IMMEDIATO: manda subito una notifica per verificare il telefono
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification("Test Immediato", {
+                    body: "Se leggi questo, il telefono riceve le notifiche!",
+                    icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png"
+                });
             });
 
-            // Inviamo il comando al Service Worker per il background
+            // Avvio del timer da 30 secondi nel Service Worker
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'START_TIMER',
-                    minuti: 1
+                    secondi: 30
                 });
             }
         } else {
-            alert("Devi autorizzare le notifiche per testare l'app.");
+            alert("Devi autorizzare le notifiche!");
         }
     });
 });
