@@ -8,23 +8,19 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
     if (event.data.type === 'START_TIMER') {
-        const minuti = event.data.minuti;
+        const ms = event.data.secondi * 1000; // 30000 millisecondi
         
-        // Usiamo un intervallo, ma aggiungiamo un log per il debug
-        setInterval(() => {
-            console.log("Tentativo invio notifica su Android...");
-            
-            const options = {
-                body: "Notifica periodica attiva!",
-                icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-                badge: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-                vibrate: [200, 100, 200],
-                // Fondamentale per Android:
-                renotify: true,
-                tag: "alert-timer"
-            };
+        console.log("Timer 30 secondi avviato");
 
-            self.registration.showNotification("La tua App", options);
-        }, minuti * 60 * 1000);
+        setInterval(() => {
+            self.registration.showNotification("Promemoria 30s", {
+                body: "Sono passati 30 secondi!",
+                icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
+                image: "https://picsum.photos/600/400",
+                vibrate: [200, 100, 200],
+                tag: "timer-30s",
+                renotify: true // Fa vibrare il telefono anche se la notifica precedente è ancora lì
+            });
+        }, ms);
     }
 });
