@@ -13,7 +13,6 @@ form_add.addEventListener('submit', function(event) {
     cibo.push([codiceInput.value, nomeInput.value, new Date(scadenzaInput.value)]);
     aggiornaScadenze();
     aggiornaLista();
-    console.log(cibo);
 });
 
 function aggiornaLista() {
@@ -73,6 +72,7 @@ function caricaCibo() {
 
 // Carica i dati all'avvio
 caricaCibo();
+console.log(cibo);
 aggiornaLista();
 aggiornaScadenze();
 
