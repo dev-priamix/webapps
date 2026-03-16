@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+
     <title>PWA 30s Loop</title>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f4f8; }
@@ -15,10 +17,20 @@
 </head>
 <body>
     <div class="card">
-        <h2>Notifiche 30s</h2>
-        <button id="btn">ATTIVA LOOP</button>
-        <div id="timer-display">30</div>
-        <div id="log">Log: Pronto.</div>
+        <form id="aggiungi_cibo" class="center">
+            <label for="scadenza">Scadenza:</label>
+                <input type="date" name="scadenza" id="scadenza" required>
+            <label for="nome">Nome:</label>
+                <input type="text" name="nome" id="nome" required>
+            <label for="codice">Codice:</label>
+                <input type="text" name="codice" id="codice">
+
+            <input id="invia" type="submit" value="Aggiungi">
+        </form>
+    </div>
+
+    <div class="card" id="lista">
+
     </div>
     <script src="script.js"></script>
 </body>

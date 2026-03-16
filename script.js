@@ -1,40 +1,91 @@
-let cibo = [
-    ['carne', new Date(2026, 2, 15)],
-    ['carne', new Date(2026, 0, 17)],
-    ['carne', new Date(2026, 0, 16)]
-];
+let form_add = document.getElementById('aggiungi_cibo');
+let scadenzaInput = form_add.querySelector('#scadenza');
+let nomeInput = form_add.querySelector('#nome');
+let codiceInput = form_add.querySelector('#codice');
+let submitInput = form_add.querySelector('#invia');
+
+let cibo = [];
+
+let lista = document.getElementById('lista');
+
+form_add.addEventListener('submit', function(event) {
+    event.preventDefault();
+    cibo.push([codiceInput.value, nomeInput.value, new Date(scadenzaInput.value)]);
+    aggiornaScadenze();
+    aggiornaLista();
+    console.log(cibo);
+});
+
+function aggiornaLista() {
+    let stringa_scadenze = "";
+    cibo.forEach(element => {
+        stringa_scadenze += `${element[0]} <br> 
+        ${element[1]} - ${element[2].toLocaleDateString()}<br> <hr> <br>`;
+    });
+    lista.innerHTML = `<p>${stringa_scadenze}</p>`;
+}
 
 let scadenze = [];
-let stringa_scadenze = "";
 
-window.addEventListener("load", function() {
-    console.log('load');
+function aggiornaScadenze() {
+    scadenze = [];
     const today = new Date();
-
     cibo.forEach(e => {
         if (
-            e[1].getDate() === today.getDate() &&
-            e[1].getMonth() === today.getMonth() &&
-            e[1].getFullYear() === today.getFullYear()
+            e[2].getDate() === today.getDate() &&
+            e[2].getMonth() === today.getMonth() &&
+            e[2].getFullYear() === today.getFullYear()
         ) {
             scadenze.push(e[0]);
         }
     });
 
     if (scadenze.length > 0) {
-        
-        scadenze.forEach(el => {
-            stringa_scadenze += el + ", ";
-        });
-        stringa_scadenze = stringa_scadenze.slice(0, -2); // Rimuove l'ultima virgola
+        let stringa_scadenze = scadenze.join(", ");
         console.log('Scadenza oggi:', stringa_scadenze);
     }
+}
+
+window.addEventListener("load", function() {
+    aggiornaScadenze();
+    aggiornaLista();
 });
 
-const timerDisplay = document.getElementById('timer-display');
-const logDiv = document.getElementById('log');
-let timeLeft = 30;
-let timerRunning = false;
+
+
+// Salva l'array cibo su localStorage come JSON
+function salvaCibo() {
+    localStorage.setItem('cibo', JSON.stringify(cibo));
+}
+
+// Carica l'array cibo da localStorage
+function caricaCibo() {
+    const dati = localStorage.getItem('cibo');
+    if (dati) {
+        // Mapping per ricostruire le date
+        cibo = JSON.parse(dati).map(item => [
+            item[0],
+            item[1],
+            new Date(item[2])
+        ]);
+    }
+}
+
+// Carica i dati all'avvio
+caricaCibo();
+aggiornaLista();
+aggiornaScadenze();
+
+// Salva i dati ogni volta che si aggiunge un elemento
+form_add.addEventListener('submit', function() {
+    salvaCibo();
+});
+
+
+
+
+
+// notifiche
 
 // Registrazione SW
 if ('serviceWorker' in navigator) {
@@ -48,7 +99,7 @@ async function pushNotification() {
         return;
     }
     // Eseguiamo la prima notifica subito
-    triggerSwNotification(stringa_scadenze);
+    triggerSwNotification(scadenze.join(", "));
 }
 
 function triggerSwNotification(messaggio = "Notifica generica") {
@@ -58,10 +109,8 @@ function triggerSwNotification(messaggio = "Notifica generica") {
             reg.active.postMessage({ 
                 action: 'SEND_PUSH',
                 bodyText: messaggioDinamico,
-                titleText: "Allarme PWA"
+                titleText: "Allarme scadenza"
             });
         }
     });
 }
-
-document.getElementById('btn').addEventListener('click', pushNotification);
