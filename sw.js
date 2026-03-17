@@ -11,8 +11,8 @@ self.addEventListener('message', (event) => {
 
         const options = {
         body: body,
-        icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-        tag: "pwa-30s",
+        icon: "logo.png",
+        tag: "Magna Magna",
         
         // --- QUESTE RIGHE ATTIVANO IL POPUP IN ALTO ---
         renotify: true,
