@@ -27,3 +27,10 @@ self.addEventListener('message', (event) => {
         self.registration.showNotification(title, options);
     }
 });
+
+
+// Questo serve per far capire ad Android che l'app può funzionare offline
+self.addEventListener('fetch', (event) => {
+    // Non serve che faccia nulla di speciale per ora
+    return;
+});
