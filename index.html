@@ -1,41 +1,42 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <link rel="apple-touch-icon" href="logo.png">
-
-    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
-
     <title>MagnaMagna</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="shortcut icon" href="logo.png" type="image/png">
+
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f4f8; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 320px; margin: auto; }
-        #timer-display { font-size: 60px; font-weight: bold; color: #007bff; margin: 20px 0; }
-        button { background: #007bff; color: white; border: none; padding: 15px 20px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; }
-        #log { margin-top: 20px; font-size: 11px; color: #666; text-align: left; background: #ddd; padding: 10px; border-radius: 5px; height: 80px; overflow-y: auto; font-family: monospace; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 350px; margin: 10px auto; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
+        input[type="submit"] { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        #lista { text-align: left; font-size: 14px; }
+        hr { border: 0; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
     <div class="card">
-        <form id="aggiungi_cibo" class="center">
-            <label for="scadenza">Scadenza:</label>
-                <input type="date" name="scadenza" id="scadenza" required>
-            <label for="nome">Nome:</label>
-                <input type="text" name="nome" id="nome" required>
-            <label for="codice">Codice:</label>
-                <input type="text" name="codice" id="codice">
-
+        <h2>Aggiungi Cibo</h2>
+        <form id="aggiungi_cibo">
+            <label>Scadenza:</label>
+            <input type="date" id="scadenza" required>
+            <label>Nome:</label>
+            <input type="text" id="nome" placeholder="es. Latte" required>
+            <label>Codice/Note:</label>
+            <input type="text" id="codice" placeholder="es. Frigo">
             <input id="invia" type="submit" value="Aggiungi">
         </form>
     </div>
 
     <div class="card" id="lista">
+        </div>
 
-    </div>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,36 +1,28 @@
-// AGGIUNGI QUESTO IN CIMA AL TUO sw.js
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', () => self.registration.claim());
+self.addEventListener('install', () => {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim()); // Corretto: permette l'attivazione immediata
+});
 
 self.addEventListener('message', (event) => {
     if (event.data.action === 'SEND_PUSH') {
-        
-        // Recuperiamo i dati inviati da script.js
-        const title = event.data.titleText || "Notifica Default";
-        const body = event.data.bodyText || "Nessun testo fornito";
-
+        const title = event.data.titleText || "Magna Magna";
         const options = {
-        body: body,
-        icon: "logo.png",
-        tag: "Magna Magna",
-        
-        // --- QUESTE RIGHE ATTIVANO IL POPUP IN ALTO ---
-        renotify: true,
-        vibrate: [200, 100, 200], // La vibrazione è spesso necessaria per il popup
-        priority: "high",         // Per i browser basati su Chromium
-        data: {
-            priority: "high"
-        }
-        // ----------------------------------------------
-    };
-        
+            body: event.data.bodyText,
+            icon: "logo.png",
+            badge: "logo.png", // Icona piccola nella barra notifiche Android
+            tag: "scadenza-notifica",
+            renotify: true,
+            vibrate: [200, 100, 200],
+            data: { priority: "high" }
+        };
         self.registration.showNotification(title, options);
     }
 });
 
-
-// Questo serve per far capire ad Android che l'app può funzionare offline
+// Necessario per l'installazione su Android
 self.addEventListener('fetch', (event) => {
-    // Non serve che faccia nulla di speciale per ora
     return;
 });
