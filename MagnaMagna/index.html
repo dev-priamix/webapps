@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagnaMagna PWA</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f4f8; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 380px; margin: 10px auto; }
+        input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; }
+        input[type="submit"] { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+        button { width: 95%; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; margin: 0 auto; }
+        #test_notifica { background: #28a745; color: white; }
+        #ripristina_backup { background: #6c757d; color: white; }
+        #elimina_tutto { background: #dc3545; color: white; }
+        #lista { text-align: left; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🍕 Magna Magna</h2>
+        <form id="aggiungi_cibo">
+            <input type="date" id="scadenza" required>
+            <input type="text" id="nome" placeholder="Cosa scade?" required>
+            <input type="text" id="codice" placeholder="Note (opzionale)">
+            <input type="submit" value="Aggiungi">
+        </form>
+        <div class="btn-group">
+            <button id="test_notifica">🔔 Test Notifica</button>
+            <button id="ripristina_backup">🔄 Ripristina dal Cestino (7gg) - in via di sviluppo</button>
+            <button id="elimina_tutto">🗑️ Svuota Tutto</button>
+        </div>
+    </div>
+    <div class="card" id="lista"></div>
+    <script src="script.js"></script>
+</body>
+</html>
