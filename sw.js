@@ -6,8 +6,8 @@ self.addEventListener('message', (event) => {
         // Nel tuo sw.js, dentro l'evento 'message'
         const options = {
             body: event.data.bodyText,
-            icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
-            badge: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
+            icon: "logo.png",
+            badge: "logo.png",
             vibrate: [500, 110, 500], // Vibrazione forte per svegliare il telefono
             tag: "alert-scadenza",
             renotify: true,
