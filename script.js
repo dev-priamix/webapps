@@ -1,176 +1,145 @@
-let form_add = document.getElementById('aggiungi_cibo');
-let btn_test = document.getElementById('test_notifica');
-let btn_clear_all = document.getElementById('elimina_tutto');
-let listaDiv = document.getElementById('lista');
+const form_add = document.getElementById('aggiungi_cibo');
+const btn_test = document.getElementById('test_notifica');
+const btn_clear_all = document.getElementById('elimina_tutto');
+const btn_restore = document.getElementById('ripristina_backup');
+const listaDiv = document.getElementById('lista');
+
 let cibo = [];
+let backupArray = [];
 
-// 1. REGISTRAZIONE SERVICE WORKER
+// 1. SERVICE WORKER & NOTIFICHE
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-    .then(reg => console.log("Service Worker registrato!"))
-    .catch(err => console.error("Errore SW:", err));
+    navigator.serviceWorker.register('./sw.js');
 }
 
-// 2. FUNZIONE PER INVIARE NOTIFICHE TRAMITE SW
-async function inviaMessaggioAlSW(titolo, messaggio) {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
+async function inviaNotifica(titolo, messaggio) {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
         const reg = await navigator.serviceWorker.ready;
-        if (reg.active) {
-            reg.active.postMessage({ 
-                action: 'SEND_PUSH',
-                bodyText: messaggio,
-                titleText: titolo
-            });
-        }
+        reg.active.postMessage({ action: 'SEND_PUSH', titleText: titolo, bodyText: messaggio });
     }
 }
 
-// 3. PULIZIA AUTOMATICA (Rimuove cibi scaduti da più di 14 giorni)
-function pulisciVecchiScaduti() {
-    const oggi = new Date();
-    oggi.setHours(0, 0, 0, 0);
-    const limiteGiorni = 14;
-    
-    const ciboFiltrato = cibo.filter(item => {
-        const dataScadenza = new Date(item[2]);
-        dataScadenza.setHours(0, 0, 0, 0);
-        const diffTempo = oggi - dataScadenza;
-        const diffGiorni = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
-        return diffGiorni <= limiteGiorni;
-    });
-
-    if (ciboFiltrato.length !== cibo.length) {
-        cibo = ciboFiltrato;
-        salvaDati();
-    }
-}
-
-// 4. AGGIORNA INTERFACCIA
-function aggiornaInterfaccia() {
-    pulisciVecchiScaduti(); 
-    let html = "";
-    const oggi = new Date();
-    oggi.setHours(0, 0, 0, 0);
-
-    // Ordina per data di scadenza
-    cibo.sort((a, b) => new Date(a[2]) - new Date(b[2]));
-
-    cibo.forEach((item, index) => {
-        const dataScadenza = new Date(item[2]);
-        dataScadenza.setHours(0, 0, 0, 0);
-        const diffTempo = dataScadenza - oggi;
-        const diffGiorni = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
-
-        let stileBordo = "#ccc";
-        let bgCard = "#f9f9f9";
-        let testoTempo = `Scade il: ${dataScadenza.toLocaleDateString()}`;
-        let opacita = "1";
-
-        if (diffGiorni === 0) {
-            stileBordo = "red"; bgCard = "#fff1f1"; testoTempo = "⚠️ SCADE OGGI";
-        } else if (diffGiorni === 1) {
-            stileBordo = "orange"; bgCard = "#fff7ed"; testoTempo = "⏳ SCADE DOMANI";
-        } else if (diffGiorni > 1 && diffGiorni <= 7) {
-            stileBordo = "#007bff"; testoTempo = `Scade tra ${diffGiorni} giorni`;
-        } else if (diffGiorni < 0) {
-            stileBordo = "gray"; opacita = "0.6"; testoTempo = "❌ SCADUTO";
-        }
-
-        html += `
-            <div style="padding: 15px; margin-bottom: 10px; border-radius: 12px; background: ${bgCard}; 
-                        border-left: 6px solid ${stileBordo}; opacity: ${opacita}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                        display: flex; justify-content: space-between; align-items: center;">
-                <div style="text-align: left;">
-                    <b style="font-size: 16px;">${item[1]}</b> <small style="color:#666;">(${item[0]})</small><br>
-                    <small style="color: ${stileBordo === 'gray' ? 'gray' : '#333'}; font-weight: bold;">${testoTempo}</small>
-                </div>
-                <button onclick="eliminaCibo(${index})" style="width: auto; background: #ff4444; color:white; border:none; padding: 8px 12px; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️</button>
-            </div>`;
-    });
-    listaDiv.innerHTML = html || "<p style='color:gray; padding:20px;'>La dispensa è vuota.</p>";
-}
-
-// 5. FUNZIONI DI SERVIZIO
-window.eliminaCibo = function(index) {
-    if (confirm("Vuoi eliminare questo prodotto?")) {
-        cibo.splice(index, 1);
-        salvaDati();
-        aggiornaInterfaccia();
-    }
-};
-
-// Logica per il tasto Elimina Tutto
-btn_clear_all.addEventListener('click', () => {
-    if (confirm("Sei sicuro di voler svuotare tutta la dispensa? Questa azione non è reversibile.")) {
-        cibo = [];
-        salvaDati();
-        aggiornaInterfaccia();
-        inviaMessaggioAlSW("Dispensa Svuotata", "Hai eliminato tutti i prodotti.");
-    }
-});
-
+// 2. SALVATAGGIO E CARICAMENTO (Con Cestino/Backup)
 function salvaDati() {
     localStorage.setItem('cibo', JSON.stringify(cibo));
+    localStorage.setItem('backup_cestino', JSON.stringify(backupArray));
 }
 
 function caricaDati() {
-    const datiSalvati = localStorage.getItem('cibo');
-    if (datiSalvati) {
-        cibo = JSON.parse(datiSalvati).map(i => [i[0], i[1], new Date(i[2])]);
-    }
+    const datiCibo = localStorage.getItem('cibo');
+    const datiBackup = localStorage.getItem('backup_cestino');
+    
+    if (datiCibo) cibo = JSON.parse(datiCibo);
+    if (datiBackup) backupArray = JSON.parse(datiBackup);
+    
+    pulisciCestinoVecchio(); // Svuota il cestino se sono passati 7 giorni
+    aggiornaInterfaccia();
 }
 
-// 6. CHECK AUTOMATICO ALL'AVVIO
-async function checkScadenzeAllAvvio() {
-    const oggi = new Date();
-    oggi.setHours(0, 0, 0, 0);
-    let avvisi = [];
+// 3. LOGICA CESTINO (Reset ogni 7 giorni)
+function pulisciCestinoVecchio() {
+    const ora = new Date().getTime();
+    const setteGiorni = 7 * 24 * 60 * 60 * 1000;
 
-    cibo.forEach(item => {
-        const d = new Date(item[2]);
-        d.setHours(0, 0, 0, 0);
-        const diff = Math.ceil((d - oggi) / (1000 * 60 * 60 * 24));
-
-        if (diff === 0) avvisi.push(`${item[1]} (Oggi)`);
-        if (diff === 1) avvisi.push(`${item[1]} (Domani)`);
-        if (diff === 7) avvisi.push(`${item[1]} (Tra 1 sett)`);
+    // Filtriamo il backup: teniamo solo gli item eliminati da meno di 7 giorni
+    backupArray = backupArray.filter(item => {
+        return (ora - item.dataEliminazione) < setteGiorni;
     });
-
-    if (avvisi.length > 0) {
-        inviaMessaggioAlSW("Promemoria Dispensa", "Scadenze rilevate: " + avvisi.join(", "));
-    }
+    salvaDati();
 }
 
-// 7. EVENTI
-form_add.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const n = document.getElementById('nome').value;
-    const s = document.getElementById('scadenza').value;
-    const c = document.getElementById('codice').value;
+// 4. RIPRISTINO
+btn_restore.addEventListener('click', () => {
+    if (backupArray.length === 0) {
+        alert("Il cestino è vuoto!");
+        return;
+    }
 
-    const dataScadenza = new Date(s);
-    cibo.push([c, n, dataScadenza]);
+    if (confirm(`Vuoi ripristinare ${backupArray.length} elementi eliminati negli ultimi 7 giorni?`)) {
+        // Riportiamo gli oggetti dal backup alla lista principale
+        backupArray.forEach(item => {
+            // Rimuoviamo la proprietà dataEliminazione prima di rimetterlo in cibo
+            const { dataEliminazione, ...ciboOriginale } = item;
+            cibo.push([ciboOriginale[0], ciboOriginale[1], ciboOriginale[2]]);
+        });
+
+        backupArray = []; // Svuotiamo il cestino dopo il ripristino
+        salvaDati();
+        aggiornaInterfaccia();
+        alert("Dati ripristinati con successo!");
+    }
+});
+
+// 5. INTERFACCIA
+function aggiornaInterfaccia() {
+    let html = "";
+    const oggi = new Date(); oggi.setHours(0,0,0,0);
+
+    cibo.sort((a, b) => new Date(a[2]) - new Date(b[2]));
+
+    cibo.forEach((item, index) => {
+        const d = new Date(item[2]); d.setHours(0,0,0,0);
+        const diff = Math.ceil((d - oggi) / (1000 * 60 * 60 * 24));
+        let col = "#ccc";
+
+        if (diff === 0) col="red";
+        else if (diff === 1) col="orange";
+        else if (diff > 1 && diff <= 7) col="#007bff";
+        else if (diff < 0) col="gray";
+
+        html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px; 
+                        border-radius:10px; background:white; border-left:5px solid ${col}; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                <div>
+                    <b>${item[1]}</b> <small>(${item[0]})</small><br>
+                    <small>${d.toLocaleDateString()}</small>
+                </div>
+                <button onclick="eliminaCibo(${index})" style="width:auto; background:#ff4444; color:white; padding:5px 10px; border-radius:5px;">🗑️</button>
+            </div>`;
+    });
+    listaDiv.innerHTML = html || "<p style='color:gray; text-align:center;'>Dispensa vuota.</p>";
+}
+
+// 6. ELIMINAZIONE (Sposta nel backup invece di cancellare)
+window.eliminaCibo = function(index) {
+    const itemEliminato = cibo[index];
+    
+    // Aggiungiamo la data di eliminazione per il controllo dei 7 giorni
+    const backupItem = {
+        0: itemEliminato[0],
+        1: itemEliminato[1],
+        2: itemEliminato[2],
+        dataEliminazione: new Date().getTime()
+    };
+
+    backupArray.push(backupItem); // Sposta nel cestino
+    cibo.splice(index, 1); // Rimuovi dalla lista principale
+    
     salvaDati();
     aggiornaInterfaccia();
+};
 
-    const oggi = new Date(); oggi.setHours(0,0,0,0);
-    const diff = Math.ceil((new Date(s).setHours(0,0,0,0) - oggi) / (1000*60*60*24));
-    
-    if ([0, 1, 7].includes(diff)) {
-        inviaMessaggioAlSW("Promemoria Attivo", `Ti avviserò per la scadenza di ${n}`);
+btn_clear_all.addEventListener('click', () => {
+    if (confirm("Spostare tutto nel cestino?")) {
+        cibo.forEach(item => {
+            backupArray.push({ ...item, dataEliminazione: new Date().getTime() });
+        });
+        cibo = [];
+        salvaDati();
+        aggiornaInterfaccia();
     }
+});
+
+form_add.addEventListener('submit', (e) => {
+    e.preventDefault();
+    cibo.push([document.getElementById('codice').value, document.getElementById('nome').value, document.getElementById('scadenza').value]);
+    salvaDati();
+    aggiornaInterfaccia();
     form_add.reset();
 });
 
-btn_test.addEventListener('click', () => {
-    inviaMessaggioAlSW("Test Notifica", "Il sistema Magna Magna è pronto! 🚀");
-});
+btn_test.addEventListener('click', () => inviaNotifica("Test", "Funziona! 🚀"));
 
 // AVVIO
 caricaDati();
-aggiornaInterfaccia();
-window.addEventListener('load', () => {
-    // Piccolo delay per permettere al SW di stabilizzarsi
-    setTimeout(checkScadenzeAllAvvio, 2000);
-});
