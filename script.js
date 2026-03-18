@@ -10,10 +10,22 @@ let lista = document.getElementById('lista');
 
 form_add.addEventListener('submit', function(event) {
     event.preventDefault();
+    
+    // 1. Aggiungi il nuovo elemento
     cibo.push([codiceInput.value, nomeInput.value, new Date(scadenzaInput.value)]);
+    
+    // 2. Aggiorna i dati e salva nel localStorage
     aggiornaScadenze();
     aggiornaLista();
+    salvaCibo();
+
+    // 3. Manda la notifica automatica con quello che scade OGGI
+    invioAutomaticoNotifica();
+    
+    // Opzionale: pulisci il form dopo l'invio
+    form_add.reset();
 });
+
 
 function aggiornaLista() {
     let stringa_scadenze = "";
