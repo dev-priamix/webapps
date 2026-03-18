@@ -1,88 +1,59 @@
 let form_add = document.getElementById('aggiungi_cibo');
-let scadenzaInput = document.getElementById('scadenza');
-let nomeInput = document.getElementById('nome');
-let codiceInput = document.getElementById('codice');
-let lista = document.getElementById('lista');
-
 let cibo = [];
 let scadenzeOggi = [];
 
-// --- LOGICA DATI ---
-
-function caricaCibo() {
-    const dati = localStorage.getItem('cibo');
-    if (dati) {
-        cibo = JSON.parse(dati).map(item => [item[0], item[1], new Date(item[2])]);
-    }
-    aggiornaInterfaccia();
-}
-
-function salvaCibo() {
-    localStorage.setItem('cibo', JSON.stringify(cibo));
+// Registrazione Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+    .then(reg => console.log("Service Worker registrato!"))
+    .catch(err => console.log("Errore SW:", err));
 }
 
 function aggiornaInterfaccia() {
+    const lista = document.getElementById('lista');
     let html = "";
     scadenzeOggi = [];
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    cibo.sort((a, b) => a[2] - b[2]); // Ordina per data
+    const today = new Date().toLocaleDateString();
 
     cibo.forEach(item => {
-        const itemDate = new Date(item[2]);
-        itemDate.setHours(0,0,0,0);
-
-        // Se scade oggi, aggiungi ai nomi per la notifica
-        if (itemDate.getTime() === today.getTime()) {
+        const dataItem = new Date(item[2]).toLocaleDateString();
+        if (dataItem === today) {
             scadenzeOggi.push(item[1]);
         }
-
-        html += `<b>${item[1]}</b> (${item[0]})<br>Scadenza: ${item[2].toLocaleDateString()}<hr>`;
+        html += `<b>${item[1]}</b> - ${dataItem}<hr>`;
     });
-
-    lista.innerHTML = cibo.length > 0 ? html : "Nessun elemento in lista.";
+    lista.innerHTML = html || "Lista vuota.";
 }
 
-// --- LOGICA NOTIFICHE ---
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').then(() => console.log("SW Registrato"));
-}
-
-async function invioAutomaticoNotifica() {
+async function inviaNotifica() {
     const permission = await Notification.requestPermission();
-    
     if (permission === 'granted' && scadenzeOggi.length > 0) {
-        triggerSwNotification("Oggi scade: " + scadenzeOggi.join(", "));
+        const reg = await navigator.serviceWorker.ready;
+        reg.active.postMessage({ 
+            action: 'SEND_PUSH',
+            bodyText: "Scadono oggi: " + scadenzeOggi.join(", "),
+            titleText: "Magna Magna"
+        });
     }
 }
 
-function triggerSwNotification(messaggio) {
-    navigator.serviceWorker.ready.then(reg => {
-        if (reg.active) {
-            reg.active.postMessage({ 
-                action: 'SEND_PUSH',
-                bodyText: messaggio,
-                titleText: "Magna Magna - Scadenza!"
-            });
-        }
-    });
-}
+form_add.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const n = document.getElementById('nome').value;
+    const s = document.getElementById('scadenza').value;
+    const c = document.getElementById('codice').value;
 
-// --- EVENTI ---
-
-form_add.addEventListener('submit', function(event) {
-    event.preventDefault();
+    cibo.push([c, n, new Date(s)]);
+    localStorage.setItem('cibo', JSON.stringify(cibo));
     
-    cibo.push([codiceInput.value, nomeInput.value, new Date(scadenzaInput.value)]);
-    
-    salvaCibo();
     aggiornaInterfaccia();
-    invioAutomaticoNotifica(); // Parte subito la notifica se scade oggi
-    
+    inviaNotifica();
     form_add.reset();
 });
 
-// Avvio
-caricaCibo();
+// Carica dati esistenti
+const datiSalvati = localStorage.getItem('cibo');
+if (datiSalvati) {
+    cibo = JSON.parse(datiSalvati).map(i => [i[0], i[1], new Date(i[2])]);
+    aggiornaInterfaccia();
+}

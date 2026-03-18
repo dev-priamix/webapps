@@ -1,9 +1,9 @@
-self.addEventListener('install', () => {
+self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim()); // Corretto: permette l'attivazione immediata
+    event.waitUntil(self.clients.claim()); 
 });
 
 self.addEventListener('message', (event) => {
@@ -11,8 +11,8 @@ self.addEventListener('message', (event) => {
         const title = event.data.titleText || "Magna Magna";
         const options = {
             body: event.data.bodyText,
-            icon: "logo.png",
-            badge: "logo.png", // Icona piccola nella barra notifiche Android
+            icon: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
+            badge: "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
             tag: "scadenza-notifica",
             renotify: true,
             vibrate: [200, 100, 200],
@@ -22,7 +22,7 @@ self.addEventListener('message', (event) => {
     }
 });
 
-// Necessario per l'installazione su Android
+// Indispensabile per Android
 self.addEventListener('fetch', (event) => {
     return;
 });
