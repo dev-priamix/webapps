@@ -1,57 +1,72 @@
 let form_add = document.getElementById('aggiungi_cibo');
+let btn_test = document.getElementById('test_notifica');
 let cibo = [];
-let scadenzeOggi = [];
 
-// Registrazione Service Worker
+// 1. Registrazione Service Worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
-    .then(reg => console.log("Service Worker registrato!"))
-    .catch(err => console.log("Errore SW:", err));
+    .then(reg => console.log("Service Worker registrato con successo"))
+    .catch(err => console.error("Errore registrazione SW:", err));
 }
 
-function aggiornaInterfaccia() {
-    const lista = document.getElementById('lista');
-    let html = "";
-    scadenzeOggi = [];
-    const today = new Date().toLocaleDateString();
-
-    cibo.forEach(item => {
-        const dataItem = new Date(item[2]).toLocaleDateString();
-        if (dataItem === today) {
-            scadenzeOggi.push(item[1]);
-        }
-        html += `<b>${item[1]}</b> - ${dataItem}<hr>`;
-    });
-    lista.innerHTML = html || "Lista vuota.";
-}
-
-async function inviaNotifica() {
+// 2. Funzione universale per inviare il messaggio al Service Worker
+async function inviaMessaggioAlSW(titolo, messaggio) {
     const permission = await Notification.requestPermission();
-    if (permission === 'granted' && scadenzeOggi.length > 0) {
+    if (permission === 'granted') {
         const reg = await navigator.serviceWorker.ready;
-        reg.active.postMessage({ 
-            action: 'SEND_PUSH',
-            bodyText: "Scadono oggi: " + scadenzeOggi.join(", "),
-            titleText: "Magna Magna"
-        });
+        if (reg.active) {
+            reg.active.postMessage({ 
+                action: 'SEND_PUSH',
+                bodyText: messaggio,
+                titleText: titolo
+            });
+        }
+    } else {
+        alert("Permesso notifiche negato. Abilitalo nelle impostazioni del browser.");
     }
 }
 
-form_add.addEventListener('submit', (e) => {
+// 3. Funzione per aggiornare l'interfaccia grafica
+function aggiornaInterfaccia() {
+    const listaDiv = document.getElementById('lista');
+    let html = "";
+    const oggi = new Date().toLocaleDateString();
+
+    cibo.forEach(item => {
+        const dataScadenza = new Date(item[2]).toLocaleDateString();
+        const alertStyle = (dataScadenza === oggi) ? "color: red; font-weight: bold;" : "";
+        html += `<div style="${alertStyle}"><b>${item[1]}</b> - ${dataScadenza} (${item[0]})</div><hr>`;
+    });
+    listaDiv.innerHTML = html || "Nessun cibo in lista.";
+}
+
+// 4. EVENTO: Aggiunta cibo dal form
+form_add.addEventListener('submit', async (e) => {
     e.preventDefault();
     const n = document.getElementById('nome').value;
     const s = document.getElementById('scadenza').value;
     const c = document.getElementById('codice').value;
 
-    cibo.push([c, n, new Date(s)]);
+    const nuovaScadenza = new Date(s);
+    cibo.push([c, n, nuovaScadenza]);
     localStorage.setItem('cibo', JSON.stringify(cibo));
     
     aggiornaInterfaccia();
-    inviaNotifica();
+
+    // Se scade oggi, manda notifica automatica
+    if (nuovaScadenza.toLocaleDateString() === new Date().toLocaleDateString()) {
+        inviaMessaggioAlSW("Scadenza Rilevata!", "Oggi scade: " + n);
+    }
+
     form_add.reset();
 });
 
-// Carica dati esistenti
+// 5. EVENTO: Pulsante di TEST (Invia sempre)
+btn_test.addEventListener('click', () => {
+    inviaMessaggioAlSW("Test Notifica", "Il sistema funziona correttamente! 🚀");
+});
+
+// 6. Caricamento dati iniziali
 const datiSalvati = localStorage.getItem('cibo');
 if (datiSalvati) {
     cibo = JSON.parse(datiSalvati).map(i => [i[0], i[1], new Date(i[2])]);
