@@ -30,12 +30,37 @@ async function inviaMessaggioAlSW(titolo, messaggio) {
 function aggiornaInterfaccia() {
     const listaDiv = document.getElementById('lista');
     let html = "";
-    const oggi = new Date().toLocaleDateString();
+    
+    // Reset orario di oggi per confronto preciso
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
 
     cibo.forEach(item => {
-        const dataScadenza = new Date(item[2]).toLocaleDateString();
-        const alertStyle = (dataScadenza === oggi) ? "color: red; font-weight: bold;" : "";
-        html += `<div style="${alertStyle}"><b>${item[1]}</b> - ${dataScadenza} (${item[0]})</div><hr>`;
+        const dataScadenza = new Date(item[2]);
+        dataScadenza.setHours(0, 0, 0, 0);
+
+        // Calcolo giorni rimanenti
+        const diffTempo = dataScadenza - oggi;
+        const diffGiorni = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+
+        let alertStyle = "";
+        let testoScadenza = `Scade il: ${dataScadenza.toLocaleDateString()}`;
+
+        if (diffGiorni === 0) {
+            alertStyle = "color: red; font-weight: bold;";
+            testoScadenza = "SCADE OGGI!";
+        } else if (diffGiorni === 1) {
+            alertStyle = "color: orange; font-weight: bold;";
+            testoScadenza = "Scade DOMANI!";
+        } else if (diffGiorni > 1 && diffGiorni <= 7) {
+            alertStyle = "color: blue;";
+            testoScadenza = `Scade tra ${diffGiorni} giorni`;
+        } else if (diffGiorni < 0) {
+            alertStyle = "color: gray; text-decoration: line-through;";
+            testoScadenza = "SCADUTO";
+        }
+
+        html += `<div style="${alertStyle}"><b>${item[1]}</b> - ${testoScadenza} (${item[0]})</div><hr>`;
     });
     listaDiv.innerHTML = html || "Nessun cibo in lista.";
 }
@@ -47,23 +72,36 @@ form_add.addEventListener('submit', async (e) => {
     const s = document.getElementById('scadenza').value;
     const c = document.getElementById('codice').value;
 
-    const nuovaScadenza = new Date(s);
-    cibo.push([c, n, nuovaScadenza]);
+    const dataScadenza = new Date(s);
+    dataScadenza.setHours(0, 0, 0, 0);
+    
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+
+    // Calcolo giorni mancanti per la notifica immediata
+    const diffTempo = dataScadenza - oggi;
+    const diffGiorni = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+
+    cibo.push([c, n, dataScadenza]);
     localStorage.setItem('cibo', JSON.stringify(cibo));
     
     aggiornaInterfaccia();
 
-    // Se scade oggi, manda notifica automatica
-    if (nuovaScadenza.toLocaleDateString() === new Date().toLocaleDateString()) {
-        inviaMessaggioAlSW("Scadenza Rilevata!", "Oggi scade: " + n);
+    // Logica Notifiche Automatiche all'inserimento
+    if (diffGiorni === 0) {
+        inviaMessaggioAlSW("Attenzione!", `Il prodotto "${n}" scade proprio OGGI!`);
+    } else if (diffGiorni === 1) {
+        inviaMessaggioAlSW("Promemoria", `Il prodotto "${n}" scadrà DOMANI.`);
+    } else if (diffGiorni === 7) {
+        inviaMessaggioAlSW("Avviso Anticipato", `Il prodotto "${n}" scadrà tra 1 settimana.`);
     }
 
     form_add.reset();
 });
 
-// 5. EVENTO: Pulsante di TEST (Invia sempre)
+// 5. EVENTO: Pulsante di TEST
 btn_test.addEventListener('click', () => {
-    inviaMessaggioAlSW("Test Notifica", "Il sistema funziona correttamente! 🚀");
+    inviaMessaggioAlSW("Test Notifica", "Il sistema Magna Magna è attivo! 🚀");
 });
 
 // 6. Caricamento dati iniziali
