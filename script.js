@@ -94,10 +94,10 @@ function aggiornaInterfaccia() {
         else if (diff < 0) col="gray";
 
         html += `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px; 
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px; position: relative;
                         border-radius:10px; background:white; border-left:5px solid ${col}; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
                 <div><b>${item[1]}</b> <small>(${item[0]})</small><br><small>${d.toLocaleDateString()}</small></div>
-                <button onclick="eliminaCibo(${index})" style="width:auto; background:#ff4444; color:white; padding:5px 10px; border-radius:5px;">🗑️</button>
+                <button onclick="eliminaCibo(${index})" style="width:auto; background:#ff4444; color:white; padding:5px 10px; border-radius:5px; position: absolute; right: 10px;">🗑️</button>
             </div>`;
     });
     listaDiv.innerHTML = html || "<p style='color:gray; text-align:center;'>Dispensa vuota.</p>";
