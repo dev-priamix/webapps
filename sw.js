@@ -44,7 +44,7 @@ self.addEventListener('message', (event) => {
         const options = {
             body: event.data.bodyText,
             icon: 'logo.png',
-            badge: 'logo.png', // Icona piccola nella barra di stato (Android)
+            badge: 'icon.png', // Icona piccola nella barra di stato (Android)
             vibrate: [200, 100, 200],
             data: {
                 dateOfArrival: Date.now(),
