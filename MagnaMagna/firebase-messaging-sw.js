@@ -10,10 +10,15 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Gestione notifiche quando il browser è chiuso o in background
 messaging.onBackgroundMessage((payload) => {
-    self.registration.showNotification(payload.notification.title, {
-        body: payload.notification.body,
+    console.log('Messaggio ricevuto in background:', payload);
+    const notificationTitle = payload.notification.title || "Scadenza MagnaMagna";
+    const notificationOptions = {
+        body: payload.notification.body || "Controlla la tua dispensa!",
         icon: 'logo.png',
+        badge: 'logo.png',
         vibrate: [500, 110, 500]
-    });
+    };
+    self.registration.showNotification(notificationTitle, notificationOptions);
 });

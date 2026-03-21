@@ -13,24 +13,40 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// REGISTRAZIONE SERVICE WORKERS
+// REGISTRAZIONE SERVICE WORKERS (Percorsi ottimizzati per GitHub)
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-    navigator.serviceWorker.register('firebase-messaging-sw.js');
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log("SW Locale attivo", reg.scope))
+            .catch(err => console.error("Errore SW Locale:", err));
+
+        navigator.serviceWorker.register('./firebase-messaging-sw.js')
+            .then(reg => console.log("SW Firebase attivo", reg.scope))
+            .catch(err => console.error("Errore SW Firebase:", err));
+    });
 }
 
 async function richiediToken() {
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            // !!! INCOLLA QUI LA TUA CHIAVE VAPID (Web Push Certificate) !!!
-            const token = await getToken(messaging, { vapidKey: 'BNqiQXc_uId6OtXnfKYnkqdh6zshU960OoEyIfnKy8NPRc9DGnD2YExsNHLx15nOs9z7qasKr6G_E1L9k3olWPc' });
-            console.log("Token dispositivo:", token);
-            localStorage.setItem('fcm_token', token);
+            // Tua VAPID Key corretta
+            const token = await getToken(messaging, { 
+                vapidKey: 'BNqiQXc_uId6OtXnfKYnkqdh6zshU960OoEyIfnKy8NPRc9DGnD2YExsNHLx15nOs9z7qasKr6G_E1L9k3olWPc' 
+            });
+            if (token) {
+                console.log("Token generato correttamente:", token);
+                localStorage.setItem('fcm_token', token);
+            } else {
+                console.warn("Nessun token generato. Controlla i permessi.");
+            }
         }
-    } catch (err) { console.error("Errore Token:", err); }
+    } catch (err) { 
+        console.error("Errore durante il recupero del Token:", err); 
+    }
 }
 
+// LOGICA APP (LISTA CIBI)
 const form_add = document.getElementById('aggiungi_cibo');
 const btn_test = document.getElementById('test_notifica');
 const btn_clear_all = document.getElementById('elimina_tutto');
@@ -49,7 +65,7 @@ function caricaDati() {
     cibo = JSON.parse(localStorage.getItem('cibo')) || [];
     backupArray = JSON.parse(localStorage.getItem('backup_cestino')) || [];
     const ora = new Date().getTime();
-    backupArray = backupArray.filter(item => (ora - item.dataEliminazione) < 604800000);
+    backupArray = backupArray.filter(item => (ora - item.dataEliminazione) < 604800000); // 7 giorni
     salvaDati();
     aggiornaInterfaccia();
 }
@@ -58,15 +74,18 @@ function aggiornaInterfaccia() {
     let html = "";
     const oggi = new Date(); oggi.setHours(0,0,0,0);
     cibo.sort((a, b) => new Date(a[2]) - new Date(b[2]));
+    
     cibo.forEach((item, index) => {
         const d = new Date(item[2]);
         const diff = Math.ceil((d - oggi) / 86400000);
         let col = diff <= 0 ? "red" : diff <= 1 ? "orange" : diff <= 7 ? "#007bff" : "#ccc";
-        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px; border-radius:10px; background:white; border-left:5px solid ${col};">
+        html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px; border-radius:10px; background:white; border-left:5px solid ${col}; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
                 <div><b>${item[1]}</b><br><small>${d.toLocaleDateString()}</small></div>
-                <button onclick="eliminaCibo(${index})" style="width:auto; background:#ff4444; color:white; padding:5px 10px;">🗑️</button></div>`;
+                <button onclick="eliminaCibo(${index})" style="width:auto; background:#ff4444; color:white; padding:5px 10px; border-radius:5px; border:none;">🗑️</button>
+            </div>`;
     });
-    listaDiv.innerHTML = html || "<p>Dispensa vuota.</p>";
+    listaDiv.innerHTML = html || "<p style='color:gray; padding:10px;'>Dispensa vuota.</p>";
 }
 
 window.eliminaCibo = (index) => {
