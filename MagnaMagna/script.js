@@ -16,7 +16,7 @@ const messaging = getMessaging(app);
 // REGISTRAZIONE SERVICE WORKERS
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js');
-    navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    navigator.serviceWorker.register('firebase-messaging-sw.js');
 }
 
 async function richiediToken() {
