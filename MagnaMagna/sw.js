@@ -3,19 +3,18 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 
 self.addEventListener('message', (event) => {
     if (event.data.action === 'SEND_PUSH') {
-        // Nel tuo sw.js, dentro l'evento 'message'
-        const options = {
+        self.registration.showNotification(event.data.titleText, {
             body: event.data.bodyText,
             icon: "logo.png",
-            badge: "icon.png",
-            vibrate: [500, 110, 500], // Vibrazione forte per svegliare il telefono
-            tag: "alert-scadenza",
-            renotify: true,
-            requireInteraction: true, // La notifica non sparisce finché non la tocchi
-            actions: [ {action: 'ok', title: 'Ho capito'} ] // Aggiunge un tasto (aiuta il sistema a considerarla importante)
-        };
-        self.registration.showNotification(event.data.titleText, options);
+            vibrate: [500, 110, 500],
+            requireInteraction: true,
+            actions: [ {action: 'close', title: 'Ho capito'} ]
+        });
     }
 });
 
-self.addEventListener('fetch', () => { return; });
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+});
+
+self.addEventListener('fetch', () => {});

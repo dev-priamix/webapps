@@ -9,7 +9,7 @@
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f4f8; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 380px; margin: 10px auto; }
-        input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; }
+        input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
         input[type="submit"] { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
         .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
         button { width: 95%; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; margin: 0 auto; }
@@ -29,12 +29,12 @@
             <input type="submit" value="Aggiungi">
         </form>
         <div class="btn-group">
-            <button id="test_notifica">🔔 Test Notifica</button>
-            <button id="ripristina_backup">🔄 Ripristina dal Cestino (7gg) - in via di sviluppo</button>
+            <button id="test_notifica">🔔 Test Notifica Locale</button>
+            <button id="ripristina_backup">🔄 Ripristina Cestino (7gg)</button>
             <button id="elimina_tutto">🗑️ Svuota Tutto</button>
         </div>
     </div>
     <div class="card" id="lista"></div>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
